@@ -28,15 +28,14 @@ const editorConfig = {
             }
         ]
     },
-    initialData: ""
+    initialData: initialPostEditorData
 };
-window.editor = null;
 
 
 ClassicEditor
     .create( document.querySelector( '#editor' ), editorConfig )
     .then( newEditor => {
-        window.editor = newEditor;
+        editor = newEditor;
     } )
     .catch( error => {
         console.error( error );

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Auth\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
@@ -22,12 +22,17 @@ class LoginController extends Controller
 
     use AuthenticatesUsers;
 
+    
+    public function showLoginForm()
+    {
+        return view('auth.admin.login');
+    }
     /**
      * Where to redirect users after login.
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = RouteServiceProvider::ADMIN_HOME;
 
     /**
      * Create a new controller instance.
@@ -36,17 +41,11 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest:web')->except('logout');
+        $this->middleware('guest:admin')->except('logout');
     }
 
-    /**
-     * Override the guard to use the admin guard instead of the default web guard.
-     *
-     * @return \Illuminate\Contracts\Auth\Guard
-     */
     protected function guard()
     {
-        return Auth::guard('web');
+        return Auth::guard('admin');
     }
-
 }

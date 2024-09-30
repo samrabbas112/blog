@@ -10,8 +10,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Post extends Model
 {
     use HasFactory;
-
-    public function categories(): BelongsTo 
+    protected $fillable = [
+        'title',
+        'slug',
+        'body', // Assuming this is the content of the post
+        'excerpt',
+        'category_id',
+        'admin_id', // Assuming this is the ID of the admin user or author
+        'status',
+        'published_at',
+        'meta_description',
+        'meta_keywords',
+        'featured_image', // For storing image paths,
+        'is_trending',
+        'is_featured',
+        'is_top'
+    ];
+        public function categories(): BelongsTo 
     {
        return $this->belongsTo(Category::class,'category_id');
     }
@@ -31,8 +46,8 @@ class Post extends Model
         return $this->morphMany(Like::class,'likeable');
     }
 
-    public function users() 
+    public function admins() 
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(Admin::class,'admin_id');
     }
 }

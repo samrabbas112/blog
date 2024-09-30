@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class TagController extends Controller
     public function index()
     {
         $tags = Tag::all();
-        return view('tags/index', compact('tags'));
+        return view('admin/tags/index', compact('tags'));
     }
 
     /**
@@ -22,7 +23,7 @@ class TagController extends Controller
     public function create($id = null)
     {
         $tag = !is_null($id) ? Tag::find($id) : null;
-        return view('tags/create', compact('tag'));
+        return view('admin/tags/create', compact('tag'));
     }
 
     /**

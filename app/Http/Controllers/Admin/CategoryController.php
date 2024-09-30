@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return view('categories/index',compact('categories'));
+        return view('admin/categories/index',compact('categories'));
     }
 
     /**
@@ -22,7 +23,7 @@ class CategoryController extends Controller
     public function create($id = null)
     {
         $category = !is_null($id) ? Category::find($id) : null;
-        return view('categories/create',compact('category'));
+        return view('admin/categories/create',compact('category'));
     }
 
     /**

@@ -1,24 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
 {
-    /**
+    
+     /**
      * Create a new controller instance.
      *
      * @return void
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware(['auth:admin', 'verified']);
     }
 
     /**
@@ -34,11 +37,11 @@ class HomeController extends Controller
         return abort(404);
     }
 
-    public function root()
+    public function dashboard()
     {
-        // dd('user');
         return view('index');
     }
+
 
     /*Language Translation*/
     public function lang($locale)
@@ -61,7 +64,7 @@ class HomeController extends Controller
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'],
         ]);
 
-        $user = User::find($id);
+        $user = Admin::find($id);
         $user->name = $request->get('name');
         $user->email = $request->get('email');
 

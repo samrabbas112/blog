@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -38,13 +39,13 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission,'guard_name' => 'admin']);
         }
 
         // Create roles and assign permissions
 
         // Editor role - manages posts, tags, and categories
-        $editor = Role::firstOrCreate(['name' => 'Editor']);
+        $editor = Role::firstOrCreate(['name' => 'Editor','guard_name' => 'admin']);
         $editor->syncPermissions([
             'edit posts',
             'delete posts',
@@ -57,7 +58,7 @@ class PermissionSeeder extends Seeder
         ]);
 
         // Creator role - can create, publish, and unpublish posts; create tags and categories
-        $creator = Role::firstOrCreate(['name' => 'Creator']);
+        $creator = Role::firstOrCreate(['name' => 'Creator', 'guard_name' => 'admin']);
         $creator->syncPermissions([
             'create posts',
             'publish posts',
@@ -69,11 +70,11 @@ class PermissionSeeder extends Seeder
         ]);
 
         // Super Admin role - full access to everything
-        $admin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $admin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'admin']);
         $admin->syncPermissions(Permission::all()); // Super Admin has all permissions
 
         // Assign Super Admin role to the first user
-        $user = User::where('id', 1)->first();
+        $user = Admin::where('id', 1)->first();
         if ($user) {
             $user->assignRole('Super Admin');
         }

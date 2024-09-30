@@ -133,7 +133,6 @@
                                 <img id="preview" src="" alt="Image Preview" style="display:none; max-width: 150px; border-radius: 50%;">
                             </div>
                         </div>
-    
                         <div class="form-group row mb-4">
                             <label for="category_id" class="col-form-label col-lg-2">Category</label>
                             <div class="col-lg-10">
@@ -157,7 +156,7 @@
                                 <select class="select2 form-control select2-multiple" name="tags[]" multiple="multiple"
                                 data-placeholder="Choose ...">
                                 @foreach($tags as $tag)
-                                <option value="{{ $tag->id }}" >{{ $tag->name }}</option>
+                                <option value="{{ $tag->id }}" {{ isset($post) && in_array($tag->id,$post->tags->pluck('id')->toArray()) ? 'selected' : ''}}>{{ $tag->name }}</option>
                             @endforeach
                                 
                             </select>
@@ -172,20 +171,20 @@
                             <div class="col-xl-3 col-sm-6">
                                 <div class="d-flex align-items-center">
                                     <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="status" id="draft" value="draft" checked>
+                                        <input class="form-check-input" type="radio" name="status" id="draft" value="draft" {{ (isset($post) && $post->status == "draft") ? 'checked' : ''}}>
                                         <label class="form-check-label" for="formRadios1">
                                             Draft
                                         </label>
                                     </div>
                                     <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="status" id="published" value="published">
+                                        <input class="form-check-input" type="radio" name="status" id="published" value="published"  {{ (isset($post) && $post->status == "published") ? 'checked' : ''}}>
                                         <label class="form-check-label" for="formRadios2">
                                             Published
                                         </label>
                                     </div>
 
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="status" id="archived" value="archived">
+                                        <input class="form-check-input" type="radio" name="status" id="archived" value="archived" {{ (isset($post) && $post->status == "archived") ? 'checked' : ''}}>
                                         <label class="form-check-label" for="formRadios2">
                                             Archived
                                         </label>
@@ -200,7 +199,7 @@
                         <div class="form-group row mb-4">
                             <label for="published_at" class="col-form-label col-lg-2">Published At</label>
                             <div class="col-lg-10">
-                                <input id="published_at" name="published_at" type="datetime-local" value="{{ isset($post) ? $post->published_at->format('Y-m-d\TH:i') : '' }}" class="form-control">
+                                <input id="published_at" name="published_at" type="datetime-local" value="{{ isset($post) ? $post->published_at : '' }}" class="form-control">
                                 @error('published_at')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
@@ -233,20 +232,20 @@
                             <div class="col-xl-3 col-sm-6">
                                 <div class="d-flex align-items-center">
                                     <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="flag" id="trending" value="trending" checked>
+                                        <input class="form-check-input" type="radio" name="flag" id="trending" value="trending" {{(isset($post) && $post->is_trending ) ? 'checked' : ''}}>
                                         <label class="form-check-label" for="trending">
                                             Trending
                                         </label>
                                     </div>
                                     <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="flag" id="featured" value="featured">
+                                        <input class="form-check-input" type="radio" name="flag" id="featured" value="featured" {{(isset($post) && $post->is_featured ) ? 'checked' : ''}}>
                                         <label class="form-check-label" for="featured">
                                             Featured
                                         </label>
                                     </div>
 
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="flag" id="top" value="top">
+                                        <input class="form-check-input" type="radio" name="flag" id="top" value="top" {{(isset($post) && $post->is_top ) ? 'checked' : ''}}>
                                         <label class="form-check-label" for="top">
                                             Top
                                         </label>
@@ -272,24 +271,33 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ URL::asset('build/libs/dropzone/dropzone-min.js') }}"></script>
     <script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
+    <script type="module" src="{{ URL::asset('assets/vendor/ckeditor5.js') }}"></script>
+
         <!-- form advanced init -->
-        <script src="{{ URL::asset('build/js/pages/form-advanced.init.js') }}"></script>
+    <script src="{{ URL::asset('build/js/pages/form-advanced.init.js') }}"></script>
 
 
 
     <script>
+    var initialPostEditorData =  @json($post?->body);
+
     $(document).ready(function() {
+        function assetUrl(path) {
+            return "{{ asset('') }}" + path; // Laravel's asset() function is used to prepend the base URL
+        }
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
+       
         var dropzonePreviewNode = document.querySelector("#dropzone-preview-list");
         
         dropzonePreviewNode.id = "";
         if (dropzonePreviewNode) {
             var previewTemplate = dropzonePreviewNode.parentNode.innerHTML;
+
             dropzonePreviewNode.parentNode.removeChild(dropzonePreviewNode);
 
             var myDropzone = new Dropzone(".dropzone", {
@@ -310,6 +318,24 @@
                     console.log("File upload failed", response);
                 }
             });
+
+            // Assuming $post->featured_image is a JSON encoded string of image URLs
+            var existingImages = JSON.parse(@json($post?->featured_image)); // If it's a JSON string
+
+            console.log(existingImages); // Check the structure
+
+            if (Array.isArray(existingImages)) { // Check if it's an array
+                existingImages.forEach(function(imageUrl) {
+                    imageUrlNew = 'storage/'+imageUrl;
+                    var mockFile = { name: imageUrl.split('/').pop(), size: 1500 }; // Adjust size as necessary
+                    myDropzone.emit("addedfile", mockFile); // Add the mock file to Dropzone
+                    myDropzone.emit("thumbnail", mockFile, assetUrl('storage/'+imageUrl)); // Display the image in Dropzone
+                    myDropzone.emit("complete", mockFile); // Mark the file as complete
+                });
+            } else {
+                console.error("existingImages is not an array:", existingImages);
+            }
+
 
             $('#submitForm').on('submit', function(e) {
                 e.preventDefault(); 
@@ -340,7 +366,13 @@
                 });
             });
         }
+        
+
+
+        
     });
+    
     </script>
+
 @endsection
 
