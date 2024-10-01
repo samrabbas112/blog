@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -15,6 +16,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->guard('admin')->user();
         $data = $superAdminCount = Admin::with('roles')->get()->filter(
             fn ($user) => $user->roles->where('name','!==', 'Super-Admin')->toArray()
         );
@@ -26,10 +28,16 @@ class UserController extends Controller
                 ->addColumn('roles', function ($row) {
                     return $row->roles->pluck('name')->implode(', '); // Get all role names as a comma-separated string
                 })
-                ->addColumn('action', function ($row) {
-                    $actionBtn = '<a href="' . route('users.create', ['id' => $row->id]) . '" class="edit btn btn-success btn-sm">Edit</a>
+                ->addColumn('action', function ($row) use($user) {
+                    if(!$user->can('edit user')) {
+                        $actionBtn = '<a href="' . route('users.destroy', ['id' => $row->id]) . '" class="delete btn btn-danger btn-sm">Delete</a>';
+                    } elseif(!$user->can('delete user')) {
+                        $actionBtn = '<a href="' . route('users.create', ['id' => $row->id]) . '" class="edit btn btn-success btn-sm">Edit</a>';
+                    } else {
+                        $actionBtn = '<a href="' . route('users.create', ['id' => $row->id]) . '" class="edit btn btn-success btn-sm">Edit</a>
                     <a href="' . route('users.destroy', ['id' => $row->id]) . '" class="delete btn btn-danger btn-sm">Delete</a>';
-                          return $actionBtn;
+                    }
+                    return $actionBtn;
                 })
                 ->rawColumns(['avatar', 'action']) // Mark 'avatar' as raw HTML to allow the image
                 ->make(true);
@@ -43,7 +51,7 @@ class UserController extends Controller
     public function create($id = null)
     {
         $user = !is_null($id) ? Admin::find($id) : null;
-        return view('users/create', compact('user'));
+        return view('admin/users/create', compact('user'));
     }
 
     /**

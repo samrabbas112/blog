@@ -39,7 +39,7 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        return view('index');
+        return view('admin/posts/index');
     }
 
 

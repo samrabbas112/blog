@@ -6,7 +6,12 @@
 @section('css')
 <!-- Sweet Alert-->
 <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+
 @endsection
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 @section('content')
     @component('components.breadcrumb')
         @slot('li_1')
@@ -16,71 +21,52 @@
             Tag List
         @endslot
     @endcomponent
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="">
-                <div class="table-responsive">
-                    <table class="table project-list-table table-nowrap align-middle table-borderless">
-                        <thead>
-                            <tr>
-                                <th scope="col">Tag</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($tags as $tag)
-                            <tr id="tagRow{{$tag->id}}">
-                                <td>
-                                    <p class="text-muted mb-0">{{ $tag->name }}</p>
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <a href="#" class="dropdown-toggle card-drop" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                            <i class="mdi mdi-dots-horizontal font-size-18"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('tags.create', ['id' => $tag->id]) }}">Edit</a>
-                                            <a class="dropdown-item delete-tag" href="#" data-id="{{ $tag->id }}">Delete</a>
-                                            {{-- {{ route('tags.destroy', ['id' => $tag->id]) }} --}}
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        
-            
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- end row -->
-
-    {{-- <div class="row">
-        <div class="col-12">
-            <div class="text-center my-3">
-                <a href="javascript:void(0);" class="text-success"><i
-                        class="bx bx-loader bx-spin font-size-18 align-middle me-2"></i> Load more </a>
-            </div>
-        </div> <!-- end col-->
-    </div>
-    <!-- end row --> --}}
+    <table class="table table-bordered yajra-datatable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tag</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+   
 @endsection
 @section('script')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Sweet Alerts js -->
 <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        // Initialize the DataTable
+        var table = $('.yajra-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('tags.index') }}",
+            columns: [
+                {
+                    data: 'id',
+                    name: 'id',
+                },
+                {
+                    data: 'name',
+                    name: 'name',
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                },
+            ]
+        });
 
-<!-- Sweet alert init js-->
-{{-- <script src="{{ URL::asset('build/js/pages/sweet-alerts.init.js') }}"></script> --}}
-<script>
-// Use a delegate event handler to attach the click event to dynamically generated elements
-$(document).on('click', '.delete-tag', function (e) {
+        $(document).on('click', '.delete-tag', function (e) {
     $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -90,7 +76,7 @@ $(document).on('click', '.delete-tag', function (e) {
 
     // Get the ID of the tag from the clicked button
     let tagId = $(this).data('id');
-
+    var row = $(this).closest('tr');
     Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -108,7 +94,7 @@ $(document).on('click', '.delete-tag', function (e) {
                 success: function (response) {
                     // Show success message
                     Swal.fire("Deleted!", "Your file has been deleted.", "success");
-                    $(`#tagRow${tagId}`).remove(); 
+                    table.row(row).remove().draw();
                 },
                 error: function (xhr) {
                     // Handle error if needed
@@ -117,6 +103,8 @@ $(document).on('click', '.delete-tag', function (e) {
             });
         }
     });
-});
+  });
+        
+    });
 </script>
 @endsection

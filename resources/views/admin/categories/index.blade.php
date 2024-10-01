@@ -6,6 +6,8 @@
 @section('css')
 <!-- Sweet Alert-->
 <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
 @endsection
 @section('content')
     @component('components.breadcrumb')
@@ -18,46 +20,17 @@
     @endcomponent
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="">
-                <div class="table-responsive">
-                    <table class="table project-list-table table-nowrap align-middle table-borderless">
-                        <thead>
-                            <tr>
-                                <th scope="col">Category</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($categories as $category)
-                            <tr id="categoryRow{{$category->id}}">
-                                <td>
-                                    <p class="text-muted mb-0">{{ $category->name }}</p>
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <a href="#" class="dropdown-toggle card-drop" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                            <i class="mdi mdi-dots-horizontal font-size-18"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('category.create', ['id' => $category->id]) }}">Edit</a>
-                                            <a class="dropdown-item delete-category" href="#" data-id="{{ $category->id }}">Delete</a>
-                                            {{-- {{ route('tags.destroy', ['id' => $tag->id]) }} --}}
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        
-            
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    <table class="table table-bordered yajra-datatable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tag</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     <!-- end row -->
 
     {{-- <div class="row">
@@ -76,11 +49,34 @@
 <!-- Sweet Alerts js -->
 <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
 
-<!-- Sweet alert init js-->
-{{-- <script src="{{ URL::asset('build/js/pages/sweet-alerts.init.js') }}"></script> --}}
-<script>
-// Use a delegate event handler to attach the click event to dynamically generated elements
-$(document).on('click', '.delete-category', function (e) {
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        // Initialize the DataTable
+        var table = $('.yajra-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('category.index') }}",
+            columns: [
+                {
+                    data: 'id',
+                    name: 'id',
+                },
+                {
+                    data: 'name',
+                    name: 'name',
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                },
+            ]
+        });
+
+        $(document).on('click', '.delete-category', function (e) {
     $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -90,7 +86,7 @@ $(document).on('click', '.delete-category', function (e) {
 
     // Get the ID of the tag from the clicked button
     let categoryId = $(this).data('id');
-
+    var row = $(this).closest('tr');
     Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -103,12 +99,12 @@ $(document).on('click', '.delete-category', function (e) {
         if (result.isConfirmed) {
             // Perform the AJAX request to delete the tag
             $.ajax({
-                url: `/category/destroy/${categoryId}`, // Update the URL to your delete route
+                url: `/categories/destroy/${categoryId}`, // Update the URL to your delete route
                 type: 'DELETE',
                 success: function (response) {
                     // Show success message
                     Swal.fire("Deleted!", "Your file has been deleted.", "success");
-                    $(`#categoryRow${categoryId}`).remove(); 
+                    table.row(row).remove().draw();
                 },
                 error: function (xhr) {
                     // Handle error if needed
@@ -117,6 +113,9 @@ $(document).on('click', '.delete-category', function (e) {
             });
         }
     });
-});
+  });
+        
+    });
 </script>
+
 @endsection

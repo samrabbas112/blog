@@ -23,6 +23,7 @@
                     </ul>
                 </li> --}}
 
+                @if(auth()->guard('admin')->user()->can('manage posts') || auth()->guard('admin')->user()->can('create posts'))
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-home-circle"></i>
@@ -30,9 +31,12 @@
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="{{ route('posts.create') }}" key="t-Create_Post">@lang('translation.Create_Post')</a></li>
+                        
                         <li><a href="{{ route('posts.index') }}" key="t-List_Post">@lang('translation.List_Post')</a></li>
                     </ul>
                 </li>
+                @endif
+               @if(auth()->guard('admin')->user()->can('manage category'))
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -44,6 +48,9 @@
                         <li><a href="{{ route('category.index') }}" key="t-List_Category">@lang('translation.List_Category')</a></li>
                     </ul>
                 </li>
+                @endif
+
+                @if(auth()->guard('admin')->user()->can('manage tags') )
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-home-circle"></i>
@@ -54,7 +61,9 @@
                         <li><a href="{{ route('tags.index') }}" key="t-List_Tag">@lang('translation.List_Tag')</a></li>
                     </ul>
                 </li>
+                @endif
 
+                @if(auth()->guard('admin')->user()->can('manage user'))
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-home-circle"></i>
@@ -65,6 +74,7 @@
                         <li><a href="{{ route('users.index') }}" key="t-List_User">@lang('translation.List_User')</a></li>
                     </ul>
                 </li>
+                @endif
             </ul>
         </div>
         <!-- Sidebar -->
