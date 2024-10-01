@@ -24,15 +24,23 @@ class PermissionSeeder extends Seeder
             'edit posts',
             'delete posts',
             'publish posts',
+            'manage posts',
+            'view posts',
             'view all posts',
             'create posts',
             'unpublish posts',
             'create tags',
             'delete tags',
             'edit tags',
+            'manage tags',
+            'view tags',
             'create category',
             'delete category',
             'edit category',
+            'manage category',
+            'view category',
+            'manage user',
+            'view user',
             'create user',
             'delete user',
             'edit user',
@@ -68,13 +76,14 @@ class PermissionSeeder extends Seeder
             'create tags',
             'create category',
         ]);
-
+       
         // Super Admin role - full access to everything
         $admin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'admin']);
         $admin->syncPermissions(Permission::all()); // Super Admin has all permissions
 
         // Assign Super Admin role to the first user
         $user = Admin::where('id', 1)->first();
+        
         if ($user) {
             $user->assignRole('Super Admin');
         }

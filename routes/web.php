@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes(['verify' => true]); // Disable registration if not needed
+Route::group(['middleware' =>'auth'],function() {
+
 Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
 Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.list');
 
@@ -32,7 +34,7 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 //Language Translation
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
-
+});
 
 // Admin authentication routes
 Route::prefix('admin')->name('admin.')->group(function () {

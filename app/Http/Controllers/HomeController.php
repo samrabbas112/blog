@@ -36,7 +36,7 @@ class HomeController extends Controller
 
     public function root()
     {
-        // dd('user');
+        dump(Auth()->guard());
         return view('index');
     }
 

@@ -39,13 +39,22 @@ class PostController extends Controller
                     // Get the author's name (assuming author relation is properly set)
                     return $row->admins->name;
                 })
-                ->addColumn('action', function ($row) {
+                ->addColumn('action', function ($row) use($user) {
                     // Edit and Delete buttons for actions
                     $editUrl = route('posts.create', ['id' => $row->id]);
                     $deleteUrl = route('posts.destroy', ['id' => $row->id]);
-    
-                    return '<a href="' . $editUrl . '" class="edit btn btn-success btn-sm">Edit</a>
-                            <a href="#" data-id="'.$row->id .'"class="delete-post btn btn-danger btn-sm">Delete</a>';
+                    if(!$user->can('edit posts')){
+                        return '<a href="#" data-id="'.$row->id .'"class="delete-post btn btn-danger btn-sm">Delete</a>';
+
+                    }
+                    else if(!$user->can('delete posts')) {
+                        return '<a href="' . $editUrl . '" class="edit btn btn-success btn-sm">Edit</a>';
+
+                    } else {
+                        return '<a href="' . $editUrl . '" class="edit btn btn-success btn-sm">Edit</a>
+                        <a href="#" data-id="'.$row->id .'"class="delete-post btn btn-danger btn-sm">Delete</a>';
+
+                    }
                 })
                 ->rawColumns(['action']) // Mark these columns as raw HTML to allow rendering
                 ->make(true);

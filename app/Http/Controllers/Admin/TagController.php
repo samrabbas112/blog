@@ -5,16 +5,36 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request as FacadesRequest;
+use Yajra\DataTables\Facades\DataTables;
 
 class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tags = Tag::all();
-        return view('admin/tags/index', compact('tags'));
+        $user = auth()->guard('admin')->user();
+
+        $data = Tag::all();
+        if ($request->ajax()) {
+            return DataTables::of($data)
+                ->addColumn('action', function ($row) use($user) {
+                    if(!$user->can('edit tags')) {
+                        $actionBtn = '<a href="' . route('tags.destroy', ['id' => $row->id]) . '" class="delete-tag btn btn-danger btn-sm">Delete</a>';
+                    } elseif(!$user->can('delete tags')) {
+                        $actionBtn = '<a href="' . route('tags.create', ['id' => $row->id]) . '" class="edit btn btn-success btn-sm">Edit</a>';
+                    } else {
+                        $actionBtn = '<a href="' . route('tags.create', ['id' => $row->id]) . '" class="edit btn btn-success btn-sm">Edit</a>
+                    <a href="' . route('tags.destroy', ['id' => $row->id]) . '" class="delete-tag btn btn-danger btn-sm">Delete</a>';
+                    }
+                    return $actionBtn;
+                })
+                ->rawColumns(['action']) // Mark 'avatar' as raw HTML to allow the image
+                ->make(true);
+        }
+        return view('admin/tags/index', compact('data'));
     }
 
     /**
