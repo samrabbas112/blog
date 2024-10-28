@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -39,7 +40,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest:admin');
+        $this->middleware('guest:web');
     }
 
     /**
@@ -82,4 +83,9 @@ class RegisterController extends Controller
             'avatar' => "/images/" . $avatarName,
         ]);
     }
+
+    // protected function guard()
+    // {
+    //     return Auth::guard('web');
+    // }
 }

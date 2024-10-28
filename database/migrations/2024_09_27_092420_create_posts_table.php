@@ -27,7 +27,7 @@ return new class extends Migration
                 $table->timestamp('published_at')->nullable();
                 $table->string('meta_description')->nullable();
                 $table->string('meta_keywords')->nullable();
-                $table->unsignedBigInteger('view_count')->default(0);
+                $table->unsignedBigInteger('likes_count')->default(0);
                 $table->timestamps();
             });
     }

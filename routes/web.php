@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\Admin\LoginController as AdminLoginController;
+use App\Http\Controllers\HomeController as ControllersHomeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -21,20 +22,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes(['verify' => true]); // Disable registration if not needed
-Route::group(['middleware' =>'auth'],function() {
-
 Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
-Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.list');
 
-//Update User Details
-Route::post('/update-profile/{id}', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('updateProfile');
-Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class, 'updatePassword'])->name('updatePassword');
+// Route::group(['middleware' =>'auth'],function() {
 
-// Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
+// Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.list');
 
-//Language Translation
-Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
-});
+// //Update User Details
+// Route::post('/update-profile/{id}', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('updateProfile');
+// Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class, 'updatePassword'])->name('updatePassword');
+
+// // Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
+
+// //Language Translation
+// Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
+// });
 
 // Admin authentication routes
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -71,3 +73,15 @@ Route::group(['middleware' =>'admin'],function() {
     Route::get('/users/create/{id?}', [AdminUserController::class, 'create'])->name('users.create');
     Route::delete('/users/destroy/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
+
+Route::group(['middleware' =>'auth'],function() {
+    Route::get('/post/details/{id}', [ControllersHomeController::class, 'show'])->name('post.details'); // Admin dashboard
+
+    
+});
+
+
+
+
+
+

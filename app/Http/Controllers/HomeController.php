@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Post;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -18,7 +21,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware(['auth','verified']);
     }
 
     /**
@@ -36,8 +39,13 @@ class HomeController extends Controller
 
     public function root()
     {
-        dump(Auth()->guard());
-        return view('index');
+        return view('users/index');
+    }
+
+    public function show($id) 
+    {
+        $post = Post::find($id);
+        return view('users/post-details',compact('post'));
     }
 
     /*Language Translation*/

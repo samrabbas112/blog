@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5-premium-features/43.1.1/ckeditor5-premium-features.css" />
     <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    
     <script type="importmap">
         {
             "imports": {
@@ -37,7 +37,7 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
         @include('layouts.topbar')
-        @include('layouts.sidebar')
+        {{-- @include('layouts.sidebar') --}}
         <!-- ============================================================== -->
         <!-- Start right Content here -->
         <!-- ============================================================== -->
