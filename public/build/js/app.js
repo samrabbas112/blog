@@ -7,7 +7,6 @@ Contact: themesbrand@gmail.com
 File: Main Js File
 */
 
-
 (function ($) {
 
     'use strict';

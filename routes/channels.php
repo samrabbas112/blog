@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Comment;
+use App\Models\Post;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -16,3 +18,16 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('like-channel.post.{post}', function ($user, Post $post) {
+    return true; // Optional: Implement your custom authorization logic here
+});
+
+Broadcast::channel('like-channel.comment.{comment}', function ($user, Comment $comment) {
+    return true; // Optional: Implement your custom authorization logic here
+});
+
+Broadcast::channel('comment-channel.{comment}', function ($user, Comment $comment) {
+    return true; // Optional: Implement your custom authorization logic here
+});
+

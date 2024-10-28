@@ -42,6 +42,8 @@ class HomeController extends Controller
         return view('admin/posts/index');
     }
 
+    
+
 
     /*Language Translation*/
     public function lang($locale)
