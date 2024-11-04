@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, \Laravel\Sanctum\HasApiTokens;
 
     protected $guard = "admin";
 
@@ -24,7 +25,7 @@ class Admin extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'dob', 
+        'dob',
         'avatar',
     ];
 

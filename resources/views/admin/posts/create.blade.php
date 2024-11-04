@@ -27,10 +27,11 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
-                <div class="alert alert-success alert-dismissible fade show d-none" id="successAlert" role="alert">
+                <div id="errorAlert" class="alert alert-danger d-none"></div>
+                <div id="successAlert" class="alert alert-success d-none">
                     <span id="successMessage"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+
                 <div class="card-body">
                     <h4 class="card-title mb-4">{{ is_null($post) ? 'Create New Post' : 'Update Post' }}</h4>
                     <form id="submitForm" enctype="multipart/form-data">
@@ -44,7 +45,7 @@
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="slug" class="col-form-label col-lg-2">Slug</label>
                             <div class="col-lg-10">
@@ -54,18 +55,18 @@
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="body" class="col-form-label col-lg-2">Body</label>
                             <div class="col-lg-10">
                                 <textarea name="content" id="editor"></textarea>
-                      
+
                                 @error('body')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="excerpt" class="col-form-label col-lg-2">Excerpt</label>
                             <div class="col-lg-10">
@@ -75,7 +76,7 @@
                                 @enderror
                             </div>
                         </div>
-    
+
                         <section>
                             <div class="form-group row mb-4">
                                 <label for="body" class="col-form-label col-lg-2">Body</label>
@@ -147,8 +148,8 @@
                                 @enderror
                             </div>
                         </div>
-    
-                        
+
+
                         <div class="form-group row mb-4">
                             {{-- {{ (isset($post) && $post->author_id == $author->id) ? 'selected' : '' }} --}}
                             <label  class="col-form-label col-lg-2">Tags</label>
@@ -158,14 +159,14 @@
                                 @foreach($tags as $tag)
                                 <option value="{{ $tag->id }}" {{ isset($post) && in_array($tag->id,$post->tags->pluck('id')->toArray()) ? 'selected' : ''}}>{{ $tag->name }}</option>
                             @endforeach
-                                
+
                             </select>
                                 @error('tags')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="status" class="col-form-label col-lg-2">Status</label>
                             <div class="col-xl-3 col-sm-6">
@@ -193,9 +194,9 @@
                             </div>
                         </div>
 
-                        
-                        
-    
+
+
+
                         <div class="form-group row mb-4">
                             <label for="published_at" class="col-form-label col-lg-2">Published At</label>
                             <div class="col-lg-10">
@@ -205,7 +206,7 @@
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="meta_description" class="col-form-label col-lg-2">Meta Description</label>
                             <div class="col-lg-10">
@@ -215,7 +216,7 @@
                                 @enderror
                             </div>
                         </div>
-    
+
                         <div class="form-group row mb-4">
                             <label for="meta_keywords" class="col-form-label col-lg-2">Meta Keywords</label>
                             <div class="col-lg-10">
@@ -225,7 +226,7 @@
                                 @enderror
                             </div>
                         </div>
-                       
+
                         <div class="form-group row mb-4">
                             <label for="status" class="col-form-label col-lg-2">Flag</label>
 
@@ -264,7 +265,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- end row -->
 @endsection
 @section('script')
@@ -291,9 +292,9 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-       
+
         var dropzonePreviewNode = document.querySelector("#dropzone-preview-list");
-        
+
         dropzonePreviewNode.id = "";
         if (dropzonePreviewNode) {
             var previewTemplate = dropzonePreviewNode.parentNode.innerHTML;
@@ -338,40 +339,60 @@
 
 
             $('#submitForm').on('submit', function(e) {
-                e.preventDefault(); 
+                e.preventDefault();
 
                 var formData = new FormData(this); // 'this' refers to the form element
                 myDropzone.getAcceptedFiles().forEach((file, index) => {
                     formData.append(`file[${index}]`, file);  // Append each file
                 });
+                let id = formData.get('id')
+                console.log([...formData]);
+                let url = id ? `/api/v1/posts/${id}` : "{{ route('api.v1.posts.store') }}"
+                console.log(url);
+
                 $.ajax({
-                    url: "{{ route('posts.store') }}", 
-                    type: "post",
+                    url: url,
+                    type: id ? "PATCH": "post",
                     data: formData,
                     processData: false,  // Important for FormData
                     contentType: false,  // Important for FormData
-                    success: function(response) {
-                        // Show success message
-                        $('#successAlert').removeClass('d-none'); // Show the alert
-                        $('#successMessage').text(response.success);
+                    headers: {
+                        'Authorization': 'Bearer {{ session()->get('token') }}'
                     },
+                    success: function(response) {
+                        console.log(response);
+                            // Handle successful response
+                            $('#successAlert').removeClass('d-none'); // Show the success alert
+                            $('#successMessage').text(response.message);
+
+                    },
+
                     error: function(xhr) {
+                        console.log(xhr.responseJSON.errors);
                         if (xhr.status === 422) {
                             var errors = xhr.responseJSON.errors;
-                            if (errors.name) {
-                                $('#nameError').text(errors.name[0]);
+                            if (errors && Object.keys(errors).length > 0) {
+                                console.log('Error detected');
+
+                                // Map through the errors and join them with line breaks
+                                let errorMessages = Object.values(errors)
+                                    .flat() // Flatten in case each error has multiple messages
+                                    .join('<br>');
+
+                                // Show the error messages in the alert element
+                                $('#errorAlert').removeClass('d-none').html(errorMessages);
                             }
                         }
                     }
                 });
             });
         }
-        
 
 
-        
+
+
     });
-    
+
     </script>
 
 @endsection

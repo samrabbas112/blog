@@ -40,12 +40,20 @@
     <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript">
+
+
         $(function() {
             // Initialize the DataTable
             var table = $('.yajra-datatable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('posts.index') }}",
+                ajax: {
+                    url: "{{ route('api.v1.posts.index') }}",
+                    type: "GET",
+                    headers: {
+                        'Authorization': 'Bearer {{ session()->get('token') }}'
+                    }
+                },
                 columns: [
                     {
                         data: 'id',
@@ -79,22 +87,23 @@
                     },
                 ]
             });
-    
+
             // Setup the CSRF token for all AJAX requests
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Authorization': 'Bearer {{ session()->get('token') }}'
                 }
             });
-    
+
             // Event listener for delete action
             $(document).on('click', '.delete-post', function(e) {
                 e.preventDefault(); // Prevent the default link behavior
-    
+
                 // Get the ID of the post from the clicked button
                 let postId = $(this).data('id');
                 var row = $(this).closest('tr'); // Find the row of the clicked button
-    
+
                 // Confirmation modal using SweetAlert
                 Swal.fire({
                     title: "Are you sure?",
@@ -108,8 +117,12 @@
                     if (result.isConfirmed) {
                         // Perform the AJAX request to delete the post
                         $.ajax({
-                            url: `/posts/destroy/${postId}`, // Update the URL to your delete route
+                            url: `/api/v1/posts/${postId}`, // Update the URL to your delete route
                             type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                                'Authorization': 'Bearer {{ session()->get('token') }}'
+                            },
                             success: function(response) {
                                 // Show success message and remove the row from DataTable
                                 Swal.fire("Deleted!", "The post has been deleted.", "success");
@@ -125,5 +138,6 @@
             });
         });
     </script>
-    
+
+
 @endsection
