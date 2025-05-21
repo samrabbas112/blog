@@ -24,7 +24,7 @@ class LoginController extends Controller
 
     use AuthenticatesUsers;
 
-    
+
     public function showLoginForm()
     {
         return view('auth.admin.login');
@@ -67,4 +67,6 @@ class LoginController extends Controller
             ? new JsonResponse([], 204)
             : redirect('/admin/login');
     }
+
+
 }

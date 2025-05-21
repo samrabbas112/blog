@@ -54,10 +54,17 @@
 <script type="text/javascript">
     $(function() {
         // Initialize the DataTable
+
         var table = $('.yajra-datatable').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('category.index') }}",
+            ajax: {
+                url: "{{ route('api.v1.category.index') }}",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer {{ session()->get('token') }}'
+                }
+            },
             columns: [
                 {
                     data: 'id',
@@ -79,7 +86,8 @@
         $(document).on('click', '.delete-category', function (e) {
     $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Authorization' : 'Bearer {{ session()->get('token') }}'
             }
         });
     e.preventDefault(); // Prevent the default link behavior
@@ -99,8 +107,11 @@
         if (result.isConfirmed) {
             // Perform the AJAX request to delete the tag
             $.ajax({
-                url: `/categories/destroy/${categoryId}`, // Update the URL to your delete route
+                url: `/api/v1/category/${categoryId}`, // Update the URL to your delete route
                 type: 'DELETE',
+                headers: {
+                    'Authorization' : 'Bearer {{ session()->get('token') }}'
+                },
                 success: function (response) {
                     // Show success message
                     Swal.fire("Deleted!", "Your file has been deleted.", "success");
@@ -114,7 +125,7 @@
         }
     });
   });
-        
+
     });
 </script>
 

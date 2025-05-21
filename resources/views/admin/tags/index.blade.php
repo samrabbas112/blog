@@ -32,7 +32,7 @@
         <tbody>
         </tbody>
     </table>
-   
+
 @endsection
 @section('script')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -47,7 +47,13 @@
         var table = $('.yajra-datatable').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('tags.index') }}",
+            ajax: {
+                url: "{{ route('api.v1.tags.index') }}",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer {{ session()->get('token') }}'
+                }
+            },
             columns: [
                 {
                     data: 'id',
@@ -69,14 +75,17 @@
         $(document).on('click', '.delete-tag', function (e) {
     $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Authorization' : 'Bearer {{ session()->get('token') }}'
             }
         });
     e.preventDefault(); // Prevent the default link behavior
 
     // Get the ID of the tag from the clicked button
     let tagId = $(this).data('id');
+    console.log(tagId);
     var row = $(this).closest('tr');
+
     Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -89,8 +98,12 @@
         if (result.isConfirmed) {
             // Perform the AJAX request to delete the tag
             $.ajax({
-                url: `/tags/destroy/${tagId}`, // Update the URL to your delete route
+                url: `/api/v1/tags/${tagId}`, // Update the URL to your delete route
                 type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Authorization': 'Bearer {{ session()->get('token') }}'
+                },
                 success: function (response) {
                     // Show success message
                     Swal.fire("Deleted!", "Your file has been deleted.", "success");
@@ -104,7 +117,7 @@
         }
     });
   });
-        
+
     });
 </script>
 @endsection

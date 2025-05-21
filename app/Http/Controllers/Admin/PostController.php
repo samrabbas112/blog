@@ -15,7 +15,9 @@ use Yajra\DataTables\Facades\DataTables;
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function index(Request $request)
     {
@@ -58,15 +60,16 @@ class PostController extends Controller
                 })
                 ->rawColumns(['action']) // Mark these columns as raw HTML to allow rendering
                 ->make(true);
-    
+
         }
-        
+
 
         return view('admin/posts/index',compact('posts'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application
      */
     public function create($id = null)
     {
@@ -78,10 +81,11 @@ class PostController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
-{
+    {
     $user = Auth::guard('admin')->user();
     // Validate the request data
     $validated = $request->validate([
@@ -99,7 +103,7 @@ class PostController extends Controller
         'flag' => 'required|in:trending,top,featured',
         'file.*' => 'file|mimetypes:image/jpeg,image/png,image/jpg|max:2048', // Example for image file
     ]);
-    
+
     $id = $request->input('id'); // Get the ID from the request
 
     $filePath = [];
@@ -108,10 +112,10 @@ class PostController extends Controller
             $filePath[] = $file->store('posts', 'public'); // Store in 'public/posts' directory
         }
     }
-    
+
     // Create or update the post
     if ($id == null) {
-       
+
         $post = Post::create([
             'title' => $validated['title'],
             'slug' => $validated['slug'],
@@ -124,10 +128,10 @@ class PostController extends Controller
             'is_trending' => $validated['flag'] == "trending" ? true : false,
             'is_featured' => $validated['flag'] == "featured" ? true : false,
             'is_top' => $validated['flag'] == "top" ? true : false,
-            'admin_id' => $user->id, 
+            'admin_id' => $user->id,
             // Other fields as necessary
         ]);
-        
+
 
         // Sync tags (Many to Many relationship)
         if ($validated['tags']) {
@@ -164,7 +168,8 @@ class PostController extends Controller
 }
 
     /**
-     * Remove the specified resource from storage.
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(int $id)
     {
